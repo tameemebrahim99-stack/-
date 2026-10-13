@@ -194,3 +194,13 @@ footer p:last-child {
     opacity: 1;
     transform: translateY(0);
 }
+
+.person-photo {
+    display: block;
+    width: 180px;
+    max-width: 80%;
+    height: auto;
+    margin: 20px auto;
+    border-radius: 12px;
+    object-fit: cover;
+}
