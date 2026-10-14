@@ -76,8 +76,103 @@
 
   <footer>
     <p>ربنا يرحمك يا غالي.</p>
-    <p>تاريخ الوفاة: 20 أغسطس، سنة 2026</p>
+      <!-- استدعاء مكتبة Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <div style="max-width: 500px; margin: 20px auto; font-family: sans-serif; direction: rtl;">
+    <h3>التعليقات</h3>
+
+    <!-- نموذج كتابة التعليق -->
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="comment-name" placeholder="الاسم" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+      <textarea id="comment-content" placeholder="اكتب تعليقك هنا..." rows="3" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;"></textarea>
+      <button onclick="addComment()" style="padding: 10px; background-color: #333; color: #fff; border: none; border-radius: 8px; cursor: pointer;">إرسال التعليق</button>
+    </div>
+
+    <!-- قائمة عرض التعليقات -->
+    <div id="comments-list">جاري تحميل التعليقات...</div>
+    
+    <!-- زر إظهار المزيد -->
+    <button id="load-more-btn" onclick="loadMoreComments()" style="display: none; width: 100%; padding: 8px; margin-top: 10px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;">إظهار المزيد من التعليقات</button>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://xfpfubjhxclmlfiatzlz.supabase.co';
+    const SUPABASE_KEY = 'Sb_publishable_fVVaQQN49q4QMUSy98WuTw_mF8u5lGw';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentLimit = 3;
+
+    async function fetchComments() {
+      const { data, error } = await supabaseClient
+        .from('comments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(currentLimit);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const listDiv = document.getElementById('comments-list');
+      listDiv.innerHTML = '';
+
+      data.forEach(item => {
+        const commentEl = document.createElement('div');
+        commentEl.style.cssText = 'background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #eee; color: #333; text-align: right;';
+        commentEl.innerHTML = `<strong>${escapeHtml(item.name)}</strong><p style="margin: 5px 0 0 0;">${escapeHtml(item.content)}</p>`;
+        listDiv.appendChild(commentEl);
+      });
+
+      const loadMoreBtn = document.getElementById('load-more-btn');
+      if (data.length >= currentLimit) {
+        loadMoreBtn.style.display = 'block';
+      } else {
+        loadMoreBtn.style.display = 'none';
+      }
+    }
+
+    async function addComment() {
+      const nameInput = document.getElementById('comment-name');
+      const contentInput = document.getElementById('comment-content');
+
+      const name = nameInput.value.trim();
+      const content = contentInput.value.trim();
+
+      if (!name || !content) {
+        alert('يرجى كتابة الاسم والتعليق');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('comments')
+        .insert([{ name: name, content: content }]);
+
+      if (error) {
+        alert('حدث خطأ أثناء حفظ التعليق');
+        console.error(error);
+      } else {
+        nameInput.value = '';
+        contentInput.value = '';
+        fetchComments();
+      }
+    }
+
+    function loadMoreComments() {
+      currentLimit += 5;
+      fetchComments();
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    fetchComments();
+  </script>
+
+    <p>تاريخ الوفاة: 20 أغسطس، سنة 2026</p>
+    
 <p class="developer-credit" dir="ltr">Developed by Tamim</p>
    
   </footer>
